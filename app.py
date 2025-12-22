@@ -1,19 +1,18 @@
-from flask import Flask,render_template,request
-import pickle
-from sklearn.preprocessing import StandardScaler
-from src.pipeline.predict_pipeline import PredictPipeline,CustomData
-import pandas as pd
-import numpy as np
-app=Flask(__name__)
+from flask import Flask, render_template, request
+from src.pipeline.predict_pipeline import PredictPipeline, CustomData
+
+app = Flask(__name__, template_folder="templates")
+
 @app.route('/')
 def home():
-    return render_template('home.html')
-@app.route('/predict',methods=['GET','POST'])
+    return render_template('home.html', results=None)
+
+@app.route('/predict', methods=['GET', 'POST'])
 def predict():
-    if request.method=='GET':
-        return render_template('home.html',results=None)
+    if request.method == 'GET':
+        return render_template('home.html', results=None)
     else:
-        data=CustomData(
+        data = CustomData(
             gender=request.form.get('gender'),
             race_ethnicity=request.form.get('race_ethnicity'),
             parental_level_of_education=request.form.get('parental_level_of_education'),
@@ -22,13 +21,9 @@ def predict():
             reading_score=float(request.form.get('reading_score')),
             writing_score=float(request.form.get('writing_score'))
         )
+
         pred_df = data.get_data_as_data_frame()
         predict_pipeline = PredictPipeline()
         results = predict_pipeline.predict(pred_df)
+
         return render_template('home.html', results=results[0])
-
-if __name__=="__main__":
-    app.run(host='0.0.0.0')
-    
-
-        
